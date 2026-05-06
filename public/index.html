@@ -20,6 +20,7 @@
         <a href="#" data-category="business">Finance</a>
         <a href="#" data-category="technology">Tech</a>
         <a href="#" data-category="entertainment">Culture</a>
+        <a href="#" data-category="recommended">Recommended</a>
         <button id="theme-toggle">🌙 Dark Mode</button>
       </nav>
     </div>
@@ -67,22 +68,41 @@
 
   <!-- ⭐ FINAL MODAL (Only One Modal Exists Now) -->
   <div id="article-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
 
-      <img id="modal-image" src="" alt="" style="width:100%; border-radius:10px; margin-bottom:10px; display:none;">
+  <div class="modal-content">
+
+    <span class="close-modal">&times;</span>
+
+    <img
+      id="modal-image"
+      src=""
+      alt=""
+    >
+
+    <div class="modal-body">
 
       <h2 id="modal-title"></h2>
+
       <p id="modal-description"></p>
 
-      <p id="modal-source" style="font-weight:bold; margin-top:10px;"></p>
-      <p id="modal-time" style="color:#777; margin-top:-5px;"></p>
+      <p id="modal-source"></p>
 
-      <a id="modal-link" href="#" target="_blank" class="modal-read-more">
+      <p id="modal-time"></p>
+
+      <a
+        id="modal-link"
+        href="#"
+        target="_blank"
+        class="modal-read-more"
+      >
         Read full article →
       </a>
+
     </div>
+
   </div>
+
+</div>
 
   <script src="script.js" defer></script>
 
