@@ -120,28 +120,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadRecommendedNews() {
 
-    const profile =
-      JSON.parse(localStorage.getItem("userProfile")) || {};
-
     const interests =
-      Object.entries(profile)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0,3)
-        .map(item => item[0])
-        .join(" ");
+      localStorage.getItem("userProfile") || "";
 
     console.log("USER INTERESTS:", interests);
+
+    if (!interests.trim()) return;
 
     try {
 
       const res = await fetch(
-        `http://127.0.0.1:5000/recommend?profile=${interests}`
+        `http://127.0.0.1:5000/recommend?profile=${encodeURIComponent(interests)}`
       );
 
       const data = await res.json();
 
+      console.log(data);
+
       if (!data || data.length === 0) {
-        showEmptyState();
         return;
       }
 
@@ -150,8 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch(err) {
 
       console.error(err);
-
-      showEmptyState();
     }
   }
 

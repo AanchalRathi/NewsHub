@@ -8,6 +8,42 @@ app = Flask(__name__)
 CORS(app)
 
 GNEWS_KEY = "6091fdfb0afb1f1f52fc9dd7307d0267"
+MEDIASTACK_KEY = "34a11449acd9be6eac157115bc083e7c"
+
+
+# ---------- NORMALIZE ARTICLES ----------
+def normalize_articles(articles):
+
+    normalized = []
+
+    for a in articles:
+
+        source_name = "Unknown"
+
+        if isinstance(a.get("source"), dict):
+            source_name = a.get("source", {}).get("name") or "Unknown"
+
+        elif isinstance(a.get("source"), str):
+            source_name = a.get("source")
+
+        normalized.append({
+
+            "title": a.get("title") or "Untitled Article",
+
+            "description": a.get("description") or "",
+
+            "url": a.get("url"),
+
+            "image": a.get("image"),
+
+            "publishedAt":
+                a.get("publishedAt")
+                or a.get("published_at"),
+
+            "source": source_name
+        })
+
+    return normalized
 
 
 # ---------- FETCH ARTICLES ----------
@@ -22,29 +58,35 @@ def fetch_articles(query):
         "entertainment": "entertainment"
     }
 
-    # Category-based news
+    # Category feeds
     if query and query.lower() in category_map:
 
         urls.append(
-            f"https://gnews.io/api/v4/top-headlines?category={category_map[query.lower()]}&lang=en&max=20&token={GNEWS_KEY}"
+            f"https://gnews.io/api/v4/top-headlines?"
+            f"category={category_map[query.lower()]}"
+            f"&lang=en&max=20&token={GNEWS_KEY}"
         )
 
-    # Search-based news
-    if query:
+    # Search feeds
+    if query and query != "top":
 
         urls.append(
-            f"https://gnews.io/api/v4/search?q={query}&lang=en&max=20&token={GNEWS_KEY}"
+            f"https://gnews.io/api/v4/search?"
+            f"q={query}&lang=en&max=20&token={GNEWS_KEY}"
         )
 
         urls.append(
-            f"https://gnews.io/api/v4/search?q={query} news&lang=en&max=20&token={GNEWS_KEY}"
+            f"https://gnews.io/api/v4/search?"
+            f"q={query} news&lang=en&max=20&token={GNEWS_KEY}"
         )
 
-    # General fallback news
+    # General headlines
     urls.append(
-        f"https://gnews.io/api/v4/top-headlines?lang=en&max=20&token={GNEWS_KEY}"
+        f"https://gnews.io/api/v4/top-headlines?"
+        f"lang=en&max=20&token={GNEWS_KEY}"
     )
 
+    # ---------- TRY GNEWS ----------
     for u in urls:
 
         print("TRYING:", u)
@@ -52,6 +94,7 @@ def fetch_articles(query):
         try:
 
             res = requests.get(u)
+
             data = res.json()
 
             articles = data.get("articles", [])
@@ -59,11 +102,45 @@ def fetch_articles(query):
             print("FOUND:", len(articles))
 
             if articles:
-                return articles
+
+                return normalize_articles(articles)
 
         except Exception as e:
 
-            print("API ERROR:", e)
+            print("GNEWS ERROR:", e)
+
+    # ---------- MEDIASTACK FALLBACK ----------
+    print("GNews failed. Trying Mediastack...")
+
+    try:
+
+        mediastack_url = (
+            f"http://api.mediastack.com/v1/news"
+            f"?access_key={MEDIASTACK_KEY}"
+            f"&languages=en"
+            f"&limit=20"
+        )
+
+        if query and query != "top":
+            mediastack_url += f"&keywords={query}"
+
+        print("TRYING MEDIASTACK:", mediastack_url)
+
+        res = requests.get(mediastack_url)
+
+        data = res.json()
+
+        articles = data.get("data", [])
+
+        print("MEDIASTACK FOUND:", len(articles))
+
+        if articles:
+
+            return normalize_articles(articles)
+
+    except Exception as e:
+
+        print("MEDIASTACK ERROR:", e)
 
     return []
 
@@ -72,45 +149,51 @@ def fetch_articles(query):
 @app.route("/recommend", methods=["GET"])
 def recommend():
 
-    query = request.args.get("q", "").strip()
-    profile = request.args.get("profile", "").strip()
+    query = request.args.get("q", "").strip().lower()
 
-    # Use query OR profile
+    profile = request.args.get("profile", "").strip().lower()
+
     search_term = query if query else profile
 
-    # Fetch articles using correct term
     articles = fetch_articles(search_term)
 
     if not articles:
         return jsonify([])
 
-    # User interaction profile
-    user_input = (query + " " + profile).strip().lower()
+    # ---------- PURE CATEGORY FEEDS ----------
+    if query in [
+        "top",
+        "politics",
+        "business",
+        "technology",
+        "entertainment"
+    ]:
 
-    # No personalization yet → normal feed
-    if not user_input:
+        return jsonify(articles)
 
-        return jsonify([{
-            "title": a["title"],
-            "description": a.get("description"),
-            "url": a["url"],
-            "image": a.get("image"),
-            "source": a["source"]["name"],
-            "publishedAt": a.get("publishedAt"),
-        } for a in articles])
+    # ---------- NO PROFILE YET ----------
+    if not profile:
+
+        return jsonify(articles)
 
     # ---------- TF-IDF RECOMMENDATION ----------
     texts = [
 
-        (a["title"] * 2) + " " + (a.get("description") or "")
+        (
+            ((a.get("title") or "") * 2)
+            + " "
+            + (a.get("description") or "")
+        )
 
         for a in articles
     ]
 
-    vectorizer = TfidfVectorizer(stop_words="english")
+    vectorizer = TfidfVectorizer(
+        stop_words="english"
+    )
 
     vectors = vectorizer.fit_transform(
-        texts + [user_input]
+        texts + [profile]
     )
 
     similarity = cosine_similarity(
@@ -119,25 +202,17 @@ def recommend():
     ).flatten()
 
     ranked_articles = sorted(
-
         zip(articles, similarity),
-
         key=lambda x: x[1],
-
         reverse=True
     )
 
-    # Keep enough articles for scrolling
     ranked_articles = ranked_articles[:15]
 
-    return jsonify([{
-        "title": a["title"],
-        "description": a.get("description"),
-        "url": a["url"],
-        "image": a.get("image"),
-        "source": a["source"]["name"],
-        "publishedAt": a.get("publishedAt"),
-    } for a, _ in ranked_articles])
+    return jsonify([
+        article
+        for article, _ in ranked_articles
+    ])
 
 
 # ---------- RUN ----------
