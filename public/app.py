@@ -12,7 +12,9 @@ GNEWS_KEY = "6091fdfb0afb1f1f52fc9dd7307d0267"
 
 # ---------- FETCH ARTICLES ----------
 def fetch_articles(query):
+
     urls = []
+
     category_map = {
         "politics": "nation",
         "business": "business",
@@ -20,27 +22,48 @@ def fetch_articles(query):
         "entertainment": "entertainment"
     }
 
-    if query.lower() in category_map:
+    # Category-based news
+    if query and query.lower() in category_map:
+
         urls.append(
             f"https://gnews.io/api/v4/top-headlines?category={category_map[query.lower()]}&lang=en&max=20&token={GNEWS_KEY}"
         )
-    if query:
-        urls.append(f"https://gnews.io/api/v4/search?q={query}&lang=en&max=20&token={GNEWS_KEY}")
-        urls.append(f"https://gnews.io/api/v4/search?q={query} news&lang=en&max=20&token={GNEWS_KEY}")
 
-    urls.append(f"https://gnews.io/api/v4/top-headlines?lang=en&max=20&token={GNEWS_KEY}")
+    # Search-based news
+    if query:
+
+        urls.append(
+            f"https://gnews.io/api/v4/search?q={query}&lang=en&max=20&token={GNEWS_KEY}"
+        )
+
+        urls.append(
+            f"https://gnews.io/api/v4/search?q={query} news&lang=en&max=20&token={GNEWS_KEY}"
+        )
+
+    # General fallback news
+    urls.append(
+        f"https://gnews.io/api/v4/top-headlines?lang=en&max=20&token={GNEWS_KEY}"
+    )
 
     for u in urls:
+
         print("TRYING:", u)
 
-        res = requests.get(u)
-        data = res.json()
-        articles = data.get("articles", [])
+        try:
 
-        print("FOUND:", len(articles))
+            res = requests.get(u)
+            data = res.json()
 
-        if articles:
-            return articles
+            articles = data.get("articles", [])
+
+            print("FOUND:", len(articles))
+
+            if articles:
+                return articles
+
+        except Exception as e:
+
+            print("API ERROR:", e)
 
     return []
 
@@ -48,18 +71,25 @@ def fetch_articles(query):
 # ---------- MAIN ROUTE ----------
 @app.route("/recommend", methods=["GET"])
 def recommend():
-    query = request.args.get("q", "")
-    profile = request.args.get("profile", "")
 
-    articles = fetch_articles(query)
+    query = request.args.get("q", "").strip()
+    profile = request.args.get("profile", "").strip()
+
+    # Use query OR profile
+    search_term = query if query else profile
+
+    # Fetch articles using correct term
+    articles = fetch_articles(search_term)
 
     if not articles:
         return jsonify([])
 
+    # User interaction profile
     user_input = (query + " " + profile).strip().lower()
 
-    # ✅ If no user interaction → return normal news
+    # No personalization yet → normal feed
     if not user_input:
+
         return jsonify([{
             "title": a["title"],
             "description": a.get("description"),
@@ -69,23 +99,35 @@ def recommend():
             "publishedAt": a.get("publishedAt"),
         } for a in articles])
 
+    # ---------- TF-IDF RECOMMENDATION ----------
     texts = [
+
         (a["title"] * 2) + " " + (a.get("description") or "")
+
         for a in articles
     ]
 
-    vectorizer = TfidfVectorizer(stop_words='english')
-    vectors = vectorizer.fit_transform(texts + [user_input])
+    vectorizer = TfidfVectorizer(stop_words="english")
 
-    similarity = cosine_similarity(vectors[-1], vectors[:-1]).flatten()
+    vectors = vectorizer.fit_transform(
+        texts + [user_input]
+    )
+
+    similarity = cosine_similarity(
+        vectors[-1],
+        vectors[:-1]
+    ).flatten()
 
     ranked_articles = sorted(
+
         zip(articles, similarity),
+
         key=lambda x: x[1],
+
         reverse=True
     )
 
-    # keep enough articles for scrolling
+    # Keep enough articles for scrolling
     ranked_articles = ranked_articles[:15]
 
     return jsonify([{

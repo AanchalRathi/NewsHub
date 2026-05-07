@@ -32,27 +32,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeModal = document.querySelector(".close-modal");
 
   // ---------- CATEGORY NAVIGATION ----------
-  const navLinks = document.querySelectorAll("nav a");
+  document.querySelectorAll("nav a").forEach(link => {
 
-  navLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
+    link.addEventListener("click", e => {
+
       e.preventDefault();
 
-      // remove active class from all
-      navLinks.forEach(l => l.classList.remove("active"));
+      const category =
+        link.dataset.category;
 
-      // add active class to clicked link
+      document
+        .querySelectorAll("nav a")
+        .forEach(a => a.classList.remove("active"));
+
       link.classList.add("active");
 
-      const category = link.dataset.category;
+      // track user interests
+      updateUserProfile(category);
 
-      // update user profile
-      userProfile += " " + category;
-      localStorage.setItem("profile", userProfile);
+      // personalized feed
+      if (category === "recommended") {
+        loadRecommendedNews();
+        return;
+      }
 
-      // fetch category news
+      //home/normal feed
       fetchNews(category);
     });
+
   });
   
   function showEmptyState() {
@@ -74,13 +81,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   closeModal.addEventListener("click", () => modal.style.display = "none");
 
-  
+  function updateUserProfile(topic) {
+
+    if (!topic) return;
+
+    let profile =
+      JSON.parse(localStorage.getItem("userProfile")) || {};
+
+    profile[topic] = (profile[topic] || 0) + 1;
+
+    localStorage.setItem(
+      "userProfile",
+      JSON.stringify(profile)
+    );
+  }
   async function fetchNews(query = "", loadMore = false) {
     lastQuery = query;
 
     try {
       const res = await fetch(
-        `http://127.0.0.1:5000/recommend?q=${query}&profile=${encodeURIComponent(userProfile)}`
+        `http://127.0.0.1:5000/recommend?q=${query}`
       );
 
       const data = await res.json();
@@ -94,6 +114,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (e) {
       console.error("FETCH ERROR:", e);
+      showEmptyState();
+    }
+  }
+
+  async function loadRecommendedNews() {
+
+    const profile =
+      JSON.parse(localStorage.getItem("userProfile")) || {};
+
+    const interests =
+      Object.entries(profile)
+        .sort((a,b) => b[1] - a[1])
+        .slice(0,3)
+        .map(item => item[0])
+        .join(" ");
+
+    console.log("USER INTERESTS:", interests);
+
+    try {
+
+      const res = await fetch(
+        `http://127.0.0.1:5000/recommend?profile=${interests}`
+      );
+
+      const data = await res.json();
+
+      if (!data || data.length === 0) {
+        showEmptyState();
+        return;
+      }
+
+      displayRecommendedNews(data);
+
+    } catch(err) {
+
+      console.error(err);
+
       showEmptyState();
     }
   }
@@ -122,8 +179,10 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       card.addEventListener("click", () => {
-        userProfile += " " + article.title;
-        localStorage.setItem("profile", userProfile); // persist
+        userProfile += " " + (
+          article.description || ""
+        );
+        localStorage.setItem("userProfile", userProfile); // persist
         openModal(article);
       });
 
@@ -131,6 +190,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function displayRecommendedNews(articles) {
+
+    const recommendedContainer =
+      document.getElementById("recommended-container");
+
+    if (!recommendedContainer) return;
+
+    recommendedContainer.innerHTML = "";
+
+    // ONLY 6 ARTICLES
+    articles.slice(0, 6).forEach(article => {
+
+      const card = document.createElement("div");
+
+      card.className = "news-card";
+
+      const imageUrl =
+        article.image || "assets/placeholder.jpeg";
+
+      card.innerHTML = `
+        <div class="card-image">
+          <img src="${imageUrl}"
+          onerror="this.src='assets/placeholder.jpeg'">
+        </div>
+
+        <div class="card-content">
+
+          <h3>${article.title}</h3>
+
+          <div class="card-meta">
+            <span>${article.source || "Unknown"}</span>
+          </div>
+
+          <p>${article.description || ""}</p>
+
+        </div>
+      `;
+
+      card.addEventListener("click", () => {
+        openModal(article);
+      });
+
+      recommendedContainer.appendChild(card);
+
+    });
+  }
   function handleSearch() {
     const q = searchInput.value.trim();
     if (!q) return;
@@ -162,5 +267,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   fetchNews();
-
+  loadRecommendedNews();
 });

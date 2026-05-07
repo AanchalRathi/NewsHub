@@ -23,20 +23,25 @@
 }
 
 .dark-mode {
+
   --bg: #0f172a;
+
   --card-bg: #1e293b;
-  --navbar-bg: rgba(15,23,42,0.75);
+
+  --navbar-bg: rgba(15,23,42,0.78);
 
   --text-main: #f8fafc;
+
   --text-secondary: #94a3b8;
 
-  --accent: #f97316;
-  --accent-hover: #fb923c;
+  --accent: #fb923c;
 
-  --border: #334155;
+  --accent-hover: #fdba74;
+
+  --border: rgba(255,255,255,0.08);
 
   --shadow:
-    0 10px 25px rgba(0,0,0,0.25);
+    0 12px 35px rgba(0,0,0,0.35);
 }
 /* ----------------------------------------------------------
    Base Styles
@@ -56,11 +61,7 @@ body {
     transparent 20%
   ),
 
-  linear-gradient(
-    180deg,
-    #fffaf5,
-    #fff7ed
-  );
+  var(--bg);
   color: var(--text-main);
 
   margin: 0;
@@ -161,24 +162,26 @@ header h1 {
    Dark Mode
 ---------------------------------------------------------- */
 .dark-mode {
-  background-color: #0f172a;
-  color: white;
-}
 
-.dark-mode header,
-.dark-mode footer {
-  background-color: #0f172a;
-}
+  --bg: #0f172a;
 
-.dark-mode .sidebar {
-  background-color: #1e293b;
-  color: white;
-}
+  --card-bg: #1e293b;
 
-.dark-mode a {
-  color: #38bdf8;
-}
+  --navbar-bg: rgba(15,23,42,0.78);
 
+  --text-main: #f8fafc;
+
+  --text-secondary: #94a3b8;
+
+  --accent: #fb923c;
+
+  --accent-hover: #fdba74;
+
+  --border: rgba(255,255,255,0.08);
+
+  --shadow:
+    0 12px 35px rgba(0,0,0,0.35);
+}
 /* ----------------------------------------------------------
    Navbar
 ---------------------------------------------------------- */
@@ -440,7 +443,7 @@ nav a.active {
    Modern Card Styling (Phase 7)
 ---------------------------------------------------------- */
 .news-card {
-  background: rgba(255,255,255,0.88);
+  background: var(--card-bg);
 
   backdrop-filter: blur(10px);
 
@@ -556,10 +559,15 @@ nav a.active {
    Sidebar
 ---------------------------------------------------------- */
 .sidebar {
-  background-color: white;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: var(--card-bg);
+
+  color: var(--text-main);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
 }
 
 /* ---------------- MODAL ---------------- */
@@ -715,11 +723,15 @@ nav a.active {
    Footer
 ---------------------------------------------------------- */
 footer {
-  background-color: #d38537;
-  color: white;
-  text-align: center;
-  padding: 10px 0;
-  margin-top: 20px;
+  background: var(--card-bg);
+
+  color: var(--text-main);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
 }
 
 /* ----------------------------------------------------------
