@@ -47,9 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       link.classList.add("active");
 
-      // track user interests
-      updateUserProfile(category);
-
       // personalized feed
       if (category === "recommended") {
         loadRecommendedNews();
@@ -81,20 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   closeModal.addEventListener("click", () => modal.style.display = "none");
 
-  function updateUserProfile(topic) {
-
-    if (!topic) return;
-
-    let profile =
-      JSON.parse(localStorage.getItem("userProfile")) || {};
-
-    profile[topic] = (profile[topic] || 0) + 1;
-
-    localStorage.setItem(
-      "userProfile",
-      JSON.stringify(profile)
-    );
-  }
   async function fetchNews(query = "", loadMore = false) {
     lastQuery = query;
 

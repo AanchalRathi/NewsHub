@@ -2,14 +2,21 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from dotenv import load_dotenv
 import requests
+import os
+
 
 app = Flask(__name__)
+load_dotenv()
 CORS(app)
 
-GNEWS_KEY = "6091fdfb0afb1f1f52fc9dd7307d0267"
-MEDIASTACK_KEY = "34a11449acd9be6eac157115bc083e7c"
+GNEWS_KEY = os.getenv("GNEWS_KEY")
+MEDIASTACK_KEY = os.getenv("MEDIASTACK_KEY")
 
+cache = {}
+
+MAX_ARTICLES = 15
 
 # ---------- NORMALIZE ARTICLES ----------
 def normalize_articles(articles):
@@ -48,6 +55,10 @@ def normalize_articles(articles):
 
 # ---------- FETCH ARTICLES ----------
 def fetch_articles(query):
+
+    if query in cache:
+        print("CACHE HIT:", query)
+        return cache[query]
 
     urls = []
 
@@ -103,7 +114,11 @@ def fetch_articles(query):
 
             if articles:
 
-                return normalize_articles(articles)
+                normalized = normalize_articles(articles)
+
+                cache[query] = normalized
+
+                return normalized
 
         except Exception as e:
 
@@ -136,7 +151,11 @@ def fetch_articles(query):
 
         if articles:
 
-            return normalize_articles(articles)
+            normalized = normalize_articles(articles)
+
+            cache[query] = normalized
+
+            return normalized
 
     except Exception as e:
 
@@ -152,6 +171,21 @@ def recommend():
     query = request.args.get("q", "").strip().lower()
 
     profile = request.args.get("profile", "").strip().lower()
+
+    # ---------- INPUT VALIDATION ----------
+
+    query = query[:100]
+    profile = profile[:500]
+
+    query = "".join(
+        c for c in query
+        if c.isalnum() or c.isspace()
+    )
+
+    profile = "".join(
+        c for c in profile
+        if c.isalnum() or c.isspace()
+    )
 
     search_term = query if query else profile
 
@@ -207,7 +241,7 @@ def recommend():
         reverse=True
     )
 
-    ranked_articles = ranked_articles[:15]
+    ranked_articles = ranked_articles[:MAX_ARTICLES]
 
     return jsonify([
         article
