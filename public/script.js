@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastQuery = "";
   let page = 1;
 
-  // 🔥 NEW: user interest profile
+  // user interest profile
   let userProfile = localStorage.getItem("profile") || "";
 
   const container = document.getElementById("news-container");
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalLink = document.getElementById("modal-link");
   const closeModal = document.querySelector(".close-modal");
 
-  // ---------- CATEGORY NAVIGATION ----------
+  // category navigation
   document.querySelectorAll("nav a").forEach(link => {
 
     link.addEventListener("click", e => {

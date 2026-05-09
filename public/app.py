@@ -3,12 +3,21 @@ from flask_cors import CORS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
+from pymongo import MongoClient
 import requests
 import os
 
 
 app = Flask(__name__)
 load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI")
+
+client = MongoClient(MONGO_URI)
+
+db = client["youth_news_hub"]
+
+users_collection = db["users"]
+
 CORS(app)
 
 GNEWS_KEY = os.getenv("GNEWS_KEY")
@@ -18,7 +27,6 @@ cache = {}
 
 MAX_ARTICLES = 15
 
-# ---------- NORMALIZE ARTICLES ----------
 def normalize_articles(articles):
 
     normalized = []
@@ -53,7 +61,7 @@ def normalize_articles(articles):
     return normalized
 
 
-# ---------- FETCH ARTICLES ----------
+
 def fetch_articles(query):
 
     if query in cache:
@@ -69,7 +77,7 @@ def fetch_articles(query):
         "entertainment": "entertainment"
     }
 
-    # Category feeds
+    # category feeds
     if query and query.lower() in category_map:
 
         urls.append(
@@ -78,7 +86,7 @@ def fetch_articles(query):
             f"&lang=en&max=20&token={GNEWS_KEY}"
         )
 
-    # Search feeds
+    # search feeds
     if query and query != "top":
 
         urls.append(
@@ -91,13 +99,12 @@ def fetch_articles(query):
             f"q={query} news&lang=en&max=20&token={GNEWS_KEY}"
         )
 
-    # General headlines
     urls.append(
         f"https://gnews.io/api/v4/top-headlines?"
         f"lang=en&max=20&token={GNEWS_KEY}"
     )
 
-    # ---------- TRY GNEWS ----------
+    #GNEWS API
     for u in urls:
 
         print("TRYING:", u)
@@ -124,7 +131,7 @@ def fetch_articles(query):
 
             print("GNEWS ERROR:", e)
 
-    # ---------- MEDIASTACK FALLBACK ----------
+    # API fallback 
     print("GNews failed. Trying Mediastack...")
 
     try:
@@ -164,7 +171,7 @@ def fetch_articles(query):
     return []
 
 
-# ---------- MAIN ROUTE ----------
+# MAIN
 @app.route("/recommend", methods=["GET"])
 def recommend():
 
@@ -172,7 +179,7 @@ def recommend():
 
     profile = request.args.get("profile", "").strip().lower()
 
-    # ---------- INPUT VALIDATION ----------
+    #validate user input
 
     query = query[:100]
     profile = profile[:500]
@@ -194,7 +201,7 @@ def recommend():
     if not articles:
         return jsonify([])
 
-    # ---------- PURE CATEGORY FEEDS ----------
+    # category feeds
     if query in [
         "top",
         "politics",
@@ -205,12 +212,12 @@ def recommend():
 
         return jsonify(articles)
 
-    # ---------- NO PROFILE YET ----------
+    #no profile 
     if not profile:
 
         return jsonify(articles)
 
-    # ---------- TF-IDF RECOMMENDATION ----------
+    #tf-idf
     texts = [
 
         (
@@ -249,6 +256,6 @@ def recommend():
     ])
 
 
-# ---------- RUN ----------
+# run
 if __name__ == "__main__":
     app.run(debug=True)

@@ -43,9 +43,7 @@
   --shadow:
     0 12px 35px rgba(0,0,0,0.35);
 }
-/* ----------------------------------------------------------
-   Base Styles
----------------------------------------------------------- */
+/* Base Styles */
 body {
   font-family: 'Inter', sans-serif;
   background:
@@ -72,9 +70,7 @@ body {
     color 0.3s ease;
 }
 
-/* ----------------------------------------------------------
-   Header
----------------------------------------------------------- */
+/* Header */
 header {
   position: sticky;
   top: 0;
@@ -158,9 +154,7 @@ header h1 {
   border-color: var(--accent);
 }
 
-/* ----------------------------------------------------------
-   Dark Mode
----------------------------------------------------------- */
+/*  Dark Mode */
 .dark-mode {
 
   --bg: #0f172a;
@@ -182,9 +176,7 @@ header h1 {
   --shadow:
     0 12px 35px rgba(0,0,0,0.35);
 }
-/* ----------------------------------------------------------
-   Navbar
----------------------------------------------------------- */
+/* Navbar */
 nav {
   display: flex;
 
@@ -214,9 +206,7 @@ nav a.active {
   color: var(--accent);
 }
 
-/* ----------------------------------------------------------
-   Search Bar
----------------------------------------------------------- */
+/*  Search Bar */
 .search-container {
   max-width: 1400px;
 
@@ -245,7 +235,6 @@ nav a.active {
   max-width: 400px;
 }
 
-/* ---------- Better Search Bar ---------- */
 .search-bar {
   display: flex;
   justify-content: center;
@@ -343,9 +332,7 @@ nav a.active {
   cursor: not-allowed;
 }
 
-/* ----------------------------------------------------------
-   Loader
----------------------------------------------------------- */
+/* loader */
 .loader {
   text-align: center;
   margin-top: 20px;
@@ -363,7 +350,7 @@ nav a.active {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---------- Empty State ---------- */
+/* Empty State*/
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -392,9 +379,7 @@ nav a.active {
   }
 }
 
-/* ----------------------------------------------------------
-   Skeleton Loader (Phase 8C)
----------------------------------------------------------- */
+/*  Skeleton Loader */
 .skeleton-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -429,9 +414,7 @@ nav a.active {
   width: 80%;
 }
 
-/* ----------------------------------------------------------
-   Card Grid Layout
----------------------------------------------------------- */
+/* Card Grid Layout */
 .news-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -439,9 +422,7 @@ nav a.active {
   margin-top: 20px;
 }
 
-/* ----------------------------------------------------------
-   Modern Card Styling (Phase 7)
----------------------------------------------------------- */
+/* Modern Card Styling */
 .news-card {
   background: var(--card-bg);
 
@@ -555,9 +536,7 @@ nav a.active {
   min-height: 72px;
 }
 
-/* ----------------------------------------------------------
-   Sidebar
----------------------------------------------------------- */
+/* Sidebar*/
 .sidebar {
   background: var(--card-bg);
 
@@ -570,7 +549,7 @@ nav a.active {
   box-shadow: var(--shadow);
 }
 
-/* ---------------- MODAL ---------------- */
+/*MODAL */
 
 .modal {
   display: none;
@@ -719,9 +698,7 @@ nav a.active {
   transform: translateY(-2px);
 }
 
-/* ----------------------------------------------------------
-   Footer
----------------------------------------------------------- */
+/* Footer */
 footer {
   background: var(--card-bg);
 
@@ -734,9 +711,6 @@ footer {
   box-shadow: var(--shadow);
 }
 
-/* ----------------------------------------------------------
-   Responsive Styles
----------------------------------------------------------- */
 @media (max-width: 768px) {
   .nav-container { flex-direction: column; }
   .grid-layout { grid-template-columns: 1fr; }
