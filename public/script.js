@@ -245,4 +245,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fetchNews();
   loadRecommendedNews();
+  const loginBtn =
+    document.getElementById("login-btn");
+
+  loginBtn.addEventListener("click", async () => {
+
+    try {
+
+      const result =
+        await auth.signInWithPopup(provider);
+
+      const user = result.user;
+
+      console.log("Logged in:", user);
+
+      alert(`Welcome ${user.displayName}`);
+
+    } catch (error) {
+
+      console.error(error);
+    }
+});
 });
