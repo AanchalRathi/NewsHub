@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let page = 1;
 
   // user interest profile
-  let userProfile = localStorage.getItem("profile") || "";
+  let userProfile = localStorage.getItem("userProfile") || "";
 
   const container = document.getElementById("news-container");
   const searchInput = document.getElementById("searchInput");
@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!q) return;
 
     userProfile += " " + q;
-    localStorage.setItem("profile", userProfile);
+    localStorage.setItem("userProfile", userProfile);
 
     page = 1;
     fetchNews(q);
@@ -246,24 +246,41 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchNews();
   loadRecommendedNews();
   const loginBtn =
-    document.getElementById("login-btn");
+  document.getElementById("login-btn");
 
-  loginBtn.addEventListener("click", async () => {
+loginBtn.addEventListener("click", async () => {
 
-    try {
+  try {
 
-      const result =
-        await auth.signInWithPopup(provider);
+    const result =
+      await auth.signInWithPopup(provider);
 
-      const user = result.user;
+    const user = result.user;
 
-      console.log("Logged in:", user);
+    const token =
+      await user.getIdToken();
 
-      alert(`Welcome ${user.displayName}`);
+    await fetch(
+      "http://127.0.0.1:5000/verify-user",
+      {
+        method: "POST",
 
-    } catch (error) {
+        headers: {
+          "Content-Type": "application/json"
+        },
 
-      console.error(error);
-    }
+        body: JSON.stringify({
+          token: token
+        })
+      }
+    );
+
+    alert(`Welcome ${user.displayName}`);
+
+  } catch (error) {
+
+    console.error(error);
+  }
+
 });
 });

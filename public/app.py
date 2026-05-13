@@ -276,7 +276,70 @@ def recommend():
         for article, _ in ranked_articles
     ])
 
+@app.route("/verify-user", methods=["POST"])
+def verify_user():
 
+    try:
+
+        data = request.get_json()
+
+        token = data.get("token")
+
+        decoded_token = auth.verify_id_token(token)
+
+        uid = decoded_token["uid"]
+
+        email = decoded_token.get("email")
+
+        name = decoded_token.get("name")
+
+        existing_user = users_collection.find_one({
+            "uid": uid
+        })
+
+        if not existing_user:
+
+            users_collection.insert_one({
+
+                "uid": uid,
+
+                "email": email,
+
+                "name": name,
+
+                "profile": ""
+
+            })
+
+            print("NEW USER CREATED")
+
+        else:
+
+            print("USER ALREADY EXISTS")
+
+        return jsonify({
+
+            "success": True,
+
+            "uid": uid,
+
+            "email": email,
+
+            "name": name
+
+        })
+
+    except Exception as e:
+
+        print("VERIFY ERROR:", e)
+
+        return jsonify({
+
+            "success": False,
+
+            "error": str(e)
+
+        }), 401
 # run
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,use_reloader=False)
