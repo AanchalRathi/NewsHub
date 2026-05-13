@@ -141,3 +141,4 @@ vite.config.ts.timestamp-*
 .env
 __pycache__/
 node_modules/
+public/firebase_key.json

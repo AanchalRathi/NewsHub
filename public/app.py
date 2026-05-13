@@ -1,15 +1,30 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
 from dotenv import load_dotenv
+
 from pymongo import MongoClient
+
+import firebase_admin
+
+from firebase_admin import credentials, auth
+
 import requests
 import os
 
 
 app = Flask(__name__)
+
+CORS(app)
+
 load_dotenv()
+
+
+# MONGODB 
+
 MONGO_URI = os.getenv("MONGO_URI")
 
 client = MongoClient(MONGO_URI)
@@ -18,8 +33,14 @@ db = client["youth_news_hub"]
 
 users_collection = db["users"]
 
-CORS(app)
 
+# FIREBASE ADMIN 
+
+cred = credentials.Certificate(
+    "public/firebase_key.json"
+)
+
+firebase_admin.initialize_app(cred)
 GNEWS_KEY = os.getenv("GNEWS_KEY")
 MEDIASTACK_KEY = os.getenv("MEDIASTACK_KEY")
 
