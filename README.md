@@ -104,20 +104,7 @@ newsproject/
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-```text
-newsproject/
-│
-├── public/
-│   ├── index.html
-│   ├── style.css
-│   ├── script.js
-│   ├── firebase.js
-│   ├── app.py
-│   └── firebase_key.json
-│
-├── .env
-├── .gitignore
-└── README.md
+
 ````
 
 ---
