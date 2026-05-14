@@ -56,6 +56,27 @@ Youth News Hub is a full-stack personalized news aggregation platform that deliv
 
 ---
 
+## Screenshots
+
+* Homepage
+* <img width="1893" height="765" alt="image" src="https://github.com/user-attachments/assets/b3c71d37-a5fa-438a-b8bc-318ad2ae228b" />
+*<img width="1464" height="764" alt="image" src="https://github.com/user-attachments/assets/9697a46d-2023-47f7-82ef-f6050862e18d" />
+
+
+* Personalized recommendations
+* <img width="1894" height="781" alt="image" src="https://github.com/user-attachments/assets/a5a2f6d1-30d0-4f7e-8146-88e0a1dc3292" />
+
+* Firebase Google login
+* <img width="1877" height="877" alt="image" src="https://github.com/user-attachments/assets/75bda9a3-0b05-4440-85ba-654f20f3354c" />
+
+* MongoDB user persistence
+* <img width="1418" height="508" alt="image" src="https://github.com/user-attachments/assets/dbe68ed3-2447-4608-baad-621b821a0dee" />
+
+* Dark mode
+* <img width="1901" height="830" alt="image" src="https://github.com/user-attachments/assets/481c99ef-052d-41d5-a3ab-ef9a7c997832" />
+
+---
+
 ## System Architecture
 
 ```text
@@ -137,7 +158,7 @@ MONGO_URI=your_mongodb_connection_uri
 ### 1. Clone Repository
 
 ```bash
-git clone <your-github-repo-link>
+git clone (https://github.com/AanchalRathi/NewsHub)
 cd newsproject
 ```
 
@@ -189,18 +210,6 @@ MongoDB stores or updates user profile
 Frontend deployment can be done using Vercel.
 Backend deployment can be done using Render.
 MongoDB Atlas and Firebase Authentication work as cloud services.
-
----
-
-## Screenshots
-
-Add screenshots or GIFs of:
-
-* Homepage
-* Personalized recommendations
-* Firebase Google login
-* MongoDB user persistence
-* Dark mode
 
 ---
 ## Future Improvements
