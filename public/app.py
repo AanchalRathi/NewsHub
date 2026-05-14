@@ -340,6 +340,41 @@ def verify_user():
             "error": str(e)
 
         }), 401
+    
+@app.route("/update-profile", methods=["POST"])
+def update_profile():
+
+    try:
+
+        data = request.get_json()
+
+        uid = data.get("uid")
+
+        profile = data.get("profile")
+
+        users_collection.update_one(
+
+            { "uid": uid },
+
+            {
+                "$set": {
+                    "profile": profile
+                }
+            }
+
+        )
+
+        return jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+
+        print("PROFILE UPDATE ERROR:", e)
+
+        return jsonify({
+            "success": False
+        }), 500
 # run
 if __name__ == "__main__":
     app.run(debug=True,use_reloader=False)

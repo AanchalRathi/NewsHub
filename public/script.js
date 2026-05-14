@@ -160,6 +160,32 @@ document.addEventListener("DOMContentLoaded", () => {
           article.description || ""
         );
         localStorage.setItem("userProfile", userProfile); // persist
+        const uid =
+          localStorage.getItem("uid");
+
+        if (uid) {
+
+          fetch(
+            "http://127.0.0.1:5000/update-profile",
+            {
+
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json"
+              },
+
+              body: JSON.stringify({
+
+                uid: uid,
+
+                profile: userProfile
+
+              })
+
+            }
+          );
+        }
         openModal(article);
       });
 
@@ -256,6 +282,11 @@ loginBtn.addEventListener("click", async () => {
       await auth.signInWithPopup(provider);
 
     const user = result.user;
+
+    localStorage.setItem(
+      "uid",
+      user.uid
+    );
 
     const token =
       await user.getIdToken();
