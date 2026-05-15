@@ -11,9 +11,10 @@ from pymongo import MongoClient
 import firebase_admin
 
 from firebase_admin import credentials, auth
-
+import json
 import requests
 import os
+
 
 
 app = Flask(__name__)
@@ -36,11 +37,18 @@ users_collection = db["users"]
 
 # FIREBASE ADMIN 
 
+firebase_credentials = json.loads(
+
+    os.getenv("FIREBASE_CREDENTIALS")
+
+)
+
 cred = credentials.Certificate(
-    "public/firebase_key.json"
+    firebase_credentials
 )
 
 firebase_admin.initialize_app(cred)
+
 GNEWS_KEY = os.getenv("GNEWS_KEY")
 MEDIASTACK_KEY = os.getenv("MEDIASTACK_KEY")
 
