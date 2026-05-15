@@ -383,6 +383,12 @@ def update_profile():
         return jsonify({
             "success": False
         }), 500
+@app.route("/")
+def home():
+
+    return {
+        "message": "Youth News Hub Backend Running"
+    }
 # run
 if __name__ == "__main__":
     app.run(debug=True,use_reloader=False)
