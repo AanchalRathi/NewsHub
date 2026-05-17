@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetch(
-        `https://your-render-backend.onrender.com/recommend?q=${query}`
+        `https://youth-news-hub-backend.onrender.com/recommend?q=${query}`
       );
 
       const data = await res.json();
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
 
       const res = await fetch(
-        `https://your-render-backend.onrender.com/recommend?profile=${encodeURIComponent(interests)}`
+        `https://youth-news-hub-backend.onrender.com/recommend?profile=${encodeURIComponent(interests)}`
       );
 
       const data = await res.json();
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (uid) {
 
           fetch(
-            "https://your-render-backend.onrender.com/update-profile",
+            "https://youth-news-hub-backend.onrender.com/update-profile",
             {
 
               method: "POST",
@@ -292,7 +292,7 @@ loginBtn.addEventListener("click", async () => {
       await user.getIdToken();
 
     await fetch(
-      "https://your-render-backend.onrender.com/verify-user",
+      "https://youth-news-hub-backend.onrender.com/verify-user",
       {
         method: "POST",
 
