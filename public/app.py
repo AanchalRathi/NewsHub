@@ -37,15 +37,25 @@ users_collection = db["users"]
 
 # FIREBASE ADMIN 
 
-firebase_credentials = json.loads(
-
-    os.getenv("FIREBASE_CREDENTIALS")
-
+firebase_env = os.getenv(
+    "FIREBASE_CREDENTIALS"
 )
 
-cred = credentials.Certificate(
-    firebase_credentials
-)
+if firebase_env:
+
+    firebase_credentials = json.loads(
+        firebase_env
+    )
+
+    cred = credentials.Certificate(
+        firebase_credentials
+    )
+
+else:
+
+    cred = credentials.Certificate(
+        "public/firebase_key.json"
+    )
 
 firebase_admin.initialize_app(cred)
 

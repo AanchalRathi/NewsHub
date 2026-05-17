@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetch(
-        `http://127.0.0.1:5000/recommend?q=${query}`
+        `https://your-render-backend.onrender.com/recommend?q=${query}`
       );
 
       const data = await res.json();
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
 
       const res = await fetch(
-        `http://127.0.0.1:5000/recommend?profile=${encodeURIComponent(interests)}`
+        `https://your-render-backend.onrender.com/recommend?profile=${encodeURIComponent(interests)}`
       );
 
       const data = await res.json();
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (uid) {
 
           fetch(
-            "http://127.0.0.1:5000/update-profile",
+            "https://your-render-backend.onrender.com/update-profile",
             {
 
               method: "POST",
@@ -292,7 +292,7 @@ loginBtn.addEventListener("click", async () => {
       await user.getIdToken();
 
     await fetch(
-      "http://127.0.0.1:5000/verify-user",
+      "https://your-render-backend.onrender.com/verify-user",
       {
         method: "POST",
 
