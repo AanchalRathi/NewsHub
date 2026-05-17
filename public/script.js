@@ -308,9 +308,26 @@ loginBtn.addEventListener("click", async () => {
 
     alert(`Welcome ${user.displayName}`);
 
-    loginBtn.style.display = "none";
-    
     fetchNews(userProfile);
+
+    loginBtn.innerHTML = `
+
+    <div class="profile-pill">
+
+      <div class="avatar">
+
+        ${user.displayName[0]}
+
+      </div>
+
+      <span>
+
+        Hello, ${user.displayName}
+
+      </span>
+
+    </div>
+    `;
 
     document.getElementById(
       "recommended-section"
