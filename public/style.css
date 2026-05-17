@@ -445,6 +445,14 @@ nav a.active {
   opacity: 0;
   transform: translateY(8px);
 
+  overflow: hidden;
+
+  word-wrap: break-word;
+
+  overflow-wrap: break-word;
+
+  min-width: 0;
+
   animation: cardFadeIn 0.45s forwards ease-out;
 }
 
@@ -506,6 +514,10 @@ nav a.active {
   color: var(--text-main);
 
   font-weight: 700;
+
+  overflow-wrap: break-word;
+
+  word-break: break-word;
 }
 
 .card-meta {
@@ -521,6 +533,7 @@ nav a.active {
 }
 
 .description {
+
   color: var(--text-secondary);
 
   line-height: 1.6;
@@ -528,12 +541,19 @@ nav a.active {
   font-size: 0.94rem;
 
   display: -webkit-box;
+
   -webkit-line-clamp: 3;
+
   -webkit-box-orient: vertical;
 
   overflow: hidden;
 
   min-height: 72px;
+
+  overflow-wrap: break-word;
+
+  word-break: break-word;
+
 }
 
 /* Sidebar*/

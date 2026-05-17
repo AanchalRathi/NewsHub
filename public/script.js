@@ -308,6 +308,18 @@ loginBtn.addEventListener("click", async () => {
 
     alert(`Welcome ${user.displayName}`);
 
+    loginBtn.style.display = "none";
+    
+    fetchNews(userProfile);
+
+    document.getElementById(
+      "recommended-section"
+    ).scrollIntoView({
+
+      behavior: "smooth"
+
+    });
+
   } catch (error) {
 
     console.error(error);
