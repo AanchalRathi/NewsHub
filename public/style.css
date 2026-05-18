@@ -212,6 +212,8 @@ nav a.active {
 
   align-items: center;
 
+  justify-content: center;
+
   gap: 10px;
 
   background: linear-gradient(
@@ -222,13 +224,13 @@ nav a.active {
 
   color: white;
 
-  padding: 10px 18px;
+  padding: 8px 14px;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   border: none;
 
-  font-weight: 700;
+  font-weight: 600;
 
   cursor: pointer;
 
@@ -236,6 +238,8 @@ nav a.active {
 
   box-shadow:
     0 8px 20px rgba(249,115,22,0.22);
+
+  min-height: 46px;
 }
 
 #login-btn:hover {
@@ -255,11 +259,20 @@ nav a.active {
   gap: 10px;
 }
 
+.profile-name {
+
+  font-size: 0.95rem;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
 .avatar {
 
-  width: 34px;
+  width: 30px;
 
-  height: 34px;
+  height: 30px;
 
   border-radius: 50%;
 
@@ -275,33 +288,38 @@ nav a.active {
 
   font-weight: bold;
 
+  font-size: 0.9rem;
+
   backdrop-filter: blur(8px);
+
+  flex-shrink: 0;
 }
 
 #logout-btn {
 
-  background: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.14);
 
   border: none;
 
   color: white;
 
-  padding: 6px 12px;
+  padding: 5px 10px;
 
-  border-radius: 8px;
+  border-radius: 7px;
 
   cursor: pointer;
 
-  font-size: 0.85rem;
+  font-size: 0.78rem;
+
+  font-weight: 600;
 
   transition: 0.25s ease;
 }
 
 #logout-btn:hover {
 
-  background: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.24);
 }
-
 /*  Search Bar */
 .search-container {
   max-width: 1400px;
@@ -666,18 +684,7 @@ nav a.active {
 
 }
 
-/* Sidebar*/
-.sidebar {
-  background: var(--card-bg);
 
-  color: var(--text-main);
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  box-shadow: var(--shadow);
-}
 
 /*MODAL */
 
@@ -826,6 +833,10 @@ nav a.active {
   background: var(--accent-hover);
 
   transform: translateY(-2px);
+}
+.sidebar {
+
+  display: none;
 }
 
 /* Footer */

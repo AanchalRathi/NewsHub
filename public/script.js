@@ -320,17 +320,16 @@ loginBtn.addEventListener("click", async () => {
 
       </div>
 
-      <span>
+      <span class="profile-name">
 
-        Hello, ${user.displayName}
-
-        <button id="logout-btn">
-
-          Logout
-
-        </button>
-
+        Hello, ${user.displayName.split(" ")[0]}
       </span>
+
+      <button id="logout-btn">
+
+        Logout
+
+      </button>
 
     </div>
     `;
@@ -349,7 +348,7 @@ loginBtn.addEventListener("click", async () => {
 
       }
     );
-    
+
     document.getElementById(
       "recommended-section"
     ).scrollIntoView({
