@@ -208,74 +208,98 @@ nav a.active {
 
 #login-btn {
 
-    display: flex;
+  display: flex;
 
-    align-items: center;
+  align-items: center;
 
-    gap: 10px;
+  gap: 10px;
 
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
+  background: linear-gradient(
+    135deg,
+    #f97316,
+    #fb7185
+  );
 
-    color: white;
+  color: white;
 
-    border: none;
+  padding: 10px 18px;
 
-    padding: 10px 18px;
+  border-radius: 12px;
 
-    border-radius: 999px;
+  border: none;
 
-    font-weight: 600;
+  font-weight: 700;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    transition: all 0.3s ease;
+  transition: all 0.28s ease;
 
-    box-shadow: 0 4px 14px rgba(
-        37, 99, 235, 0.35
-    );
+  box-shadow:
+    0 8px 20px rgba(249,115,22,0.22);
 }
 
 #login-btn:hover {
 
-    transform: translateY(-2px);
+  transform: translateY(-2px);
 
-    box-shadow: 0 6px 18px rgba(
-        37, 99, 235, 0.45
-    );
+  box-shadow:
+    0 12px 28px rgba(249,115,22,0.30);
 }
 
 .profile-pill {
 
-    display: flex;
+  display: flex;
 
-    align-items: center;
+  align-items: center;
 
-    gap: 10px;
+  gap: 10px;
 }
 
 .avatar {
 
-    width: 34px;
+  width: 34px;
 
-    height: 34px;
+  height: 34px;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    background: white;
+  background: rgba(255,255,255,0.22);
 
-    color: #2563eb;
+  color: white;
 
-    display: flex;
+  display: flex;
 
-    align-items: center;
+  align-items: center;
 
-    justify-content: center;
+  justify-content: center;
 
-    font-weight: bold;
+  font-weight: bold;
+
+  backdrop-filter: blur(8px);
+}
+
+#logout-btn {
+
+  background: rgba(255,255,255,0.18);
+
+  border: none;
+
+  color: white;
+
+  padding: 6px 12px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 0.85rem;
+
+  transition: 0.25s ease;
+}
+
+#logout-btn:hover {
+
+  background: rgba(255,255,255,0.28);
 }
 
 /*  Search Bar */
@@ -376,22 +400,6 @@ nav a.active {
 #search-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-#search-btn {
-  background: #423a96;
-  color: white;
-  padding: 9px 16px;
-  border-radius: 6px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.25s ease;
-}
-
-#search-btn:hover {
-  background: #1d4ed8;
-  transform: translateY(-2px);
 }
 
 #search-btn:active {

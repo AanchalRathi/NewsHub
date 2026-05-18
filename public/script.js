@@ -324,11 +324,32 @@ loginBtn.addEventListener("click", async () => {
 
         Hello, ${user.displayName}
 
+        <button id="logout-btn">
+
+          Logout
+
+        </button>
+
       </span>
 
     </div>
     `;
 
+    document.getElementById(
+      "logout-btn"
+    ).addEventListener(
+
+      "click",
+
+      async () => {
+
+        await auth.signOut();
+
+        location.reload();
+
+      }
+    );
+    
     document.getElementById(
       "recommended-section"
     ).scrollIntoView({
