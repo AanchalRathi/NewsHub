@@ -497,9 +497,19 @@ nav a.active {
 /* Card Grid Layout */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(320px, 1fr));
+
+  gap: 24px;
+
+  align-items: stretch;
   margin-top: 20px;
+}
+
+* {
+
+  box-sizing: border-box;
 }
 
 /* Modern Card Styling */
@@ -534,6 +544,17 @@ nav a.active {
   min-width: 0;
 
   animation: cardFadeIn 0.45s forwards ease-out;
+  width: 100%;
+
+  max-width: 100%;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  display: flex;
+
+  flex-direction: column;
 }
 
 @keyframes cardFadeIn {
@@ -583,6 +604,11 @@ nav a.active {
 /* Content Section */
 .card-content {
   padding: 14px 16px;
+
+  overflow: hidden;
+
+  min-width: 0;
+
 }
 
 .card-content h3 {
@@ -598,6 +624,10 @@ nav a.active {
   overflow-wrap: break-word;
 
   word-break: break-word;
+
+  overflow: hidden;
+
+  min-width: 0;
 }
 
 .card-meta {
