@@ -29,7 +29,7 @@ https://github.com/AanchalRathi/NewsHub
 - Dark/Light mode toggle
 - Multi-API fallback system
 - Cloud deployment using Render and Vercel
-- CI/CD-style automated deployment workflow
+- CI/CD automated deployment workflow
 
 ---
 
@@ -180,17 +180,6 @@ Personalized News Feed
 
 ---
 
-## Recommendation Engine
-
-The recommendation system uses:
-
-* TF-IDF Vectorization
-* Cosine Similarity Ranking
-
-User interaction history and search behavior are converted into a profile string. News articles are ranked based on semantic similarity between user interests and article content.
-
----
-
 ## Project Structure
 
 ```text
@@ -283,28 +272,6 @@ Handling dynamic content overflow, responsive layouts, and varying article struc
 - User preference visualization
 - Hybrid recommendation systems
 - Real-time notifications
-
----
-
-## Key Learnings
-
-This project provided hands-on experience with:
-
-- Full-stack application development
-- REST API integration
-- Firebase Authentication
-- MongoDB integration
-- Cloud deployment workflows
-- Recommendation systems
-- CI/CD deployment pipelines
-- Responsive frontend design
-- Production debugging and optimization
-
----
-
-## Resume Highlight
-
-Built and deployed a full-stack personalized news recommendation platform integrating machine learning, Firebase authentication, MongoDB Atlas, cloud deployment, and CI/CD-style automated workflows.
 
 ---
 
