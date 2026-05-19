@@ -41,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({
           uid: uid,
           text: (article.title || "") + " " + (article.description || ""),
-          category: currentCategory || "",
           timestamp: Math.floor(Date.now() / 1000)  
         })
       });

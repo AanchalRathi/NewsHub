@@ -43,7 +43,175 @@ MEDIASTACK_KEY = os.getenv("MEDIASTACK_KEY")
 
 cache = {}
 MAX_ARTICLES = 15
-MAX_CLICKS = 50  # keep only last 50 clicks per user
+MAX_CLICKS = 50
+
+
+# ---------- CATEGORY PROFILES ----------
+# Instead of keyword lists, each category is described
+# as a rich natural language paragraph.
+# TF-IDF measures similarity between article text and
+# these descriptions — no hardcoded keywords needed.
+CATEGORY_PROFILES = {
+    "sports": """
+        cricket ipl football tennis basketball match tournament player league
+        score wicket goal champion sport athlete stadium team batting bowling
+        fifa world cup olympic medal coach squad fixture result innings over
+        run boundary six four pitch umpire referee penalty shootout
+        formula one racing nascar golf swimming athletics marathon relay
+        virat kohli rohit sharma dhoni sachin tendulkar messi ronaldo federer
+        nba nfl nhl mlb premier league bundesliga la liga serie a
+        sunrisers hyderabad chennai super kings mumbai indians rajasthan royals
+        playoff semifinal final knockout qualifier points table standings
+    """,
+
+    "technology": """
+        artificial intelligence machine learning deep learning neural network
+        software hardware startup tech apple google microsoft amazon meta
+        algorithm robot automation cyber security data science cloud computing
+        smartphone iphone android app developer programming python javascript
+        semiconductor chip processor gpu cpu server database api blockchain
+        elon musk sam altman openai chatgpt gemini claude llm model
+        electric vehicle tesla self driving autonomous vehicle drone satellite
+        space exploration nasa isro spacex launch orbit moon mars
+        cybersecurity hacking privacy data breach encryption firewall
+        venture capital funding series raise valuation unicorn ipo nasdaq
+    """,
+
+    "business": """
+        economy market stock finance gdp company investor revenue profit trade
+        bank inflation interest rate monetary fiscal policy budget tax
+        merger acquisition deal contract supply chain import export
+        unemployment jobs hiring layoff recession growth quarterly earnings
+        wall street federal reserve rbi sebi sensex nifty dow jones nasdaq
+        commodity oil gold silver crude futures forex currency exchange rate
+        real estate property mortgage loan debt equity dividend shareholder
+        entrepreneur business model revenue startup scale profit margin
+        retail ecommerce consumer spending demand supply manufacturing industry
+    """,
+
+    "politics": """
+        election government minister parliament policy congress bjp president
+        senate democracy vote political party candidate campaign rally debate
+        prime minister cabinet legislation bill law constitution amendment
+        foreign policy diplomacy treaty sanctions embargo war conflict ceasefire
+        united nations security council nato g7 g20 summit bilateral
+        corruption scandal protest movement civil rights judiciary supreme court
+        modi rahul gandhi kejriwal mamata shah yogi nitish regional party
+        republican democrat liberal conservative left right wing coalition
+        referendum impeachment speaker opposition ruling party manifesto
+    """,
+
+    "entertainment": """
+        film movie music celebrity actor actress festival concert award
+        bollywood hollywood director producer screenplay box office collection
+        album song singer rapper pop rock classical jazz hip hop
+        netflix amazon prime disney streaming ott series season episode
+        cannes oscars grammy bafta golden globe emmy award nomination
+        celebrity gossip relationship dating breakup marriage divorce rumour
+        fashion designer brand model runway show vogue magazine
+        gaming video game console playstation xbox nintendo esports streamer
+        book author novel bestseller literature poetry theatre drama stage
+        comedy standup show host talk interview podcast influencer viral
+    """,
+
+    "health": """
+        health medical hospital disease virus vaccine doctor cancer treatment
+        wellness mental health therapy medication surgery clinical trial
+        pandemic epidemic outbreak infection symptoms diagnosis prescription
+        nutrition diet exercise fitness gym yoga meditation stress anxiety
+        heart disease diabetes obesity blood pressure cholesterol
+        research study pharmaceutical drug approval fda who cdc
+        pregnancy childbirth maternal infant pediatric geriatric
+        public health policy insurance healthcare system reform
+        covid influenza respiratory immune system antibody protein
+    """,
+
+    "science": """
+        research study discovery experiment laboratory scientist professor
+        physics chemistry biology astronomy geology climate environment
+        climate change global warming carbon emission renewable energy
+        solar wind nuclear fossil fuel sustainability green energy
+        space universe galaxy planet star black hole telescope observation
+        dna gene genome mutation evolution species biodiversity extinction
+        ocean marine ecosystem forest deforestation wildlife conservation
+        quantum computing particle accelerator cern breakthrough innovation
+        mathematics statistics model simulation data analysis
+    """,
+
+    "world": """
+        international global foreign country nation border conflict war peace
+        ukraine russia israel palestine gaza ceasefire humanitarian crisis
+        refugee migration asylum border crossing displaced population
+        united states america europe asia africa middle east latin america
+        china india brazil indonesia pakistan bangladesh sri lanka
+        sanctions embargo trade war tariff import export bilateral
+        natural disaster earthquake flood hurricane tsunami drought famine
+        united nations nato g20 imf world bank aid development
+        human rights freedom press democracy autocracy regime coup protest
+    """
+}
+
+# pre-compute category vectors once at startup
+# this avoids recomputing on every request
+_category_vectorizer = None
+_category_vectors = None
+_category_names = list(CATEGORY_PROFILES.keys())
+
+def get_category_vectors():
+    """
+    Lazily initializes and caches TF-IDF vectors
+    for all category profiles.
+    Called once on first use.
+    """
+    global _category_vectorizer, _category_vectors
+
+    if _category_vectorizer is not None:
+        return _category_vectorizer, _category_vectors
+
+    _category_vectorizer = TfidfVectorizer(stop_words="english")
+    _category_vectors = _category_vectorizer.fit_transform(
+        list(CATEGORY_PROFILES.values())
+    )
+
+    print("CATEGORY VECTORS INITIALIZED")
+    return _category_vectorizer, _category_vectors
+
+
+def detect_category(text):
+    """
+    Detects category of an article using TF-IDF cosine similarity.
+    Compares article text against rich category profile descriptions.
+    Returns the best matching category name.
+    No hardcoded keyword lists — works for any topic.
+    """
+    if not text or not text.strip():
+        return "general"
+
+    try:
+        vectorizer, cat_vectors = get_category_vectors()
+
+        # transform article text using existing vocabulary
+        text_vector = vectorizer.transform([text])
+
+        # compute similarity against all category profiles
+        similarities = cosine_similarity(
+            text_vector, cat_vectors
+        ).flatten()
+
+        best_idx = similarities.argmax()
+        best_score = similarities[best_idx]
+
+        # if similarity is too low, return general
+        if best_score < 0.05:
+            return "general"
+
+        detected = _category_names[best_idx]
+        print(f"DETECTED CATEGORY: {detected} (score={best_score:.3f})")
+        return detected
+
+    except Exception as e:
+        print("CATEGORY DETECTION ERROR:", e)
+        return "general"
 
 
 # ---------- NORMALIZE ARTICLES ----------
@@ -144,53 +312,37 @@ def fetch_articles(query):
 # ---------- BUILD WEIGHTED PROFILE ----------
 def build_weighted_profile(clicks):
     """
-    Builds a weighted profile string from click history.
+    Builds a weighted profile string from structured click history.
 
-    Three layers of weighting:
-    1. Time decay  — recent clicks count more than old ones
-    2. Category boost — most clicked category gets extra weight
-    3. Keyword frequency — words appearing across multiple clicks get boosted
-
-    Returns a single weighted profile string for TF-IDF.
+    Layer 1 — Time decay: recent clicks weighted higher
+    Layer 2 — Category boost: most read category gets 3x weight
+    Layer 3 — Combined profile string fed into TF-IDF
     """
-
     if not clicks:
         return ""
 
     now = time.time()
-
-    # --- Layer 1: Time decay ---
-    # Each click gets a weight based on how recent it is.
-    # Weight = e^(-0.01 * hours_since_click)
-    # A click from 1 hour ago → weight ~0.99
-    # A click from 24 hours ago → weight ~0.79
-    # A click from 7 days ago → weight ~0.18
     weighted_texts = []
 
     for click in clicks:
         timestamp = click.get("timestamp", now)
         age_hours = (now - timestamp) / 3600
+        # decay: click from 1hr ago = weight 0.99, 7 days ago = 0.18
         decay_weight = math.exp(-0.01 * age_hours)
-
-        # repeat the text proportional to weight (1–10 times)
         repeat = max(1, int(decay_weight * 10))
         text = click.get("text", "")
-        weighted_texts.append((text, repeat, click.get("category", "")))
+        category = click.get("category", "")
+        weighted_texts.append((text, repeat, category))
 
-    # --- Layer 2: Category boost ---
-    # Find the most clicked category and boost it by 3x
+    # find most clicked category for boost
     categories = [c for _, _, c in weighted_texts if c]
     category_counts = Counter(categories)
     top_category = category_counts.most_common(1)[0][0] if category_counts else None
 
-    # --- Layer 3: Build final profile string ---
     profile_parts = []
-
     for text, repeat, category in weighted_texts:
-        # base repetition from time decay
         profile_parts.append(" ".join([text] * repeat))
-
-        # category boost: if this click matches top category, add extra weight
+        # boost top category clicks by repeating 3 more times
         if top_category and category == top_category:
             profile_parts.append(" ".join([text] * 3))
 
@@ -200,28 +352,24 @@ def build_weighted_profile(clicks):
 # ---------- HYBRID SCORE ----------
 def hybrid_score(tfidf_score, article, clicks):
     """
-    Combines TF-IDF cosine similarity with category boost
-    to produce a final ranking score.
-
-    Final score = 70% TF-IDF + 30% category match bonus
+    Final score = 70% TF-IDF similarity + 30% category preference bonus
     """
     if not clicks:
         return tfidf_score
 
-    # count category preferences from click history
     categories = [c.get("category", "") for c in clicks if c.get("category")]
     category_counts = Counter(categories)
     total_clicks = len(clicks)
 
-    article_category = article.get("category", "").lower()
+    article_text = (
+        (article.get("title") or "") + " " +
+        (article.get("description") or "")
+    )
+    article_category = detect_category(article_text)
     category_freq = category_counts.get(article_category, 0)
-
-    # category bonus: how often user clicked this category (0 to 1)
     category_bonus = category_freq / total_clicks if total_clicks > 0 else 0
 
-    # weighted combination
-    final_score = (0.7 * tfidf_score) + (0.3 * category_bonus)
-    return final_score
+    return (0.7 * tfidf_score) + (0.3 * category_bonus)
 
 
 # ---------- SAVE CLICK ----------
@@ -238,11 +386,14 @@ def save_click():
         data = request.get_json()
         uid = data.get("uid")
         text = data.get("text", "")[:300]
-        category = data.get("category", "")
         timestamp = data.get("timestamp", time.time())
 
         if not uid:
             return jsonify({"success": False, "error": "uid required"}), 400
+
+        # detect category automatically from article text
+        # frontend no longer needs to send category
+        category = detect_category(text)
 
         click_obj = {
             "text": text,
@@ -262,14 +413,15 @@ def save_click():
             }
         )
 
-        print(f"CLICK SAVED for uid={uid} category={category}")
-        return jsonify({"success": True})
+        print(f"CLICK SAVED uid={uid} category={category}")
+        return jsonify({"success": True, "category": category})
 
     except Exception as e:
         print("SAVE CLICK ERROR:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+# ---------- GET PROFILE ----------
 @app.route("/get-profile", methods=["GET", "OPTIONS"])
 def get_profile():
     if request.method == "OPTIONS":
@@ -302,7 +454,6 @@ def recommend():
     query = request.args.get("q", "").strip().lower()
     uid = request.args.get("uid", "").strip()
 
-    # sanitize inputs
     query = query[:100]
     query = "".join(c for c in query if c.isalnum() or c.isspace())
 
@@ -312,11 +463,10 @@ def recommend():
     if not articles:
         return jsonify([])
 
-    # pure category/top feeds — no ranking needed
     if query in ["top", "politics", "business", "technology", "entertainment"]:
         return jsonify(articles)
 
-    # fetch user click history from MongoDB
+    # fetch click history from MongoDB
     clicks = []
     if uid:
         try:
@@ -326,17 +476,16 @@ def recommend():
         except Exception as e:
             print("MONGO FETCH ERROR:", e)
 
-    # no click history — return articles as-is
     if not clicks:
         return jsonify(articles)
 
-    # ---------- BUILD WEIGHTED PROFILE ----------
+    # build weighted profile from click history
     profile = build_weighted_profile(clicks)
 
     if not profile.strip():
         return jsonify(articles)
 
-    # ---------- TF-IDF ----------
+    # TF-IDF ranking
     texts = [
         ((a.get("title") or "") * 2) + " " + (a.get("description") or "")
         for a in articles
@@ -349,22 +498,22 @@ def recommend():
         vectors[-1], vectors[:-1]
     ).flatten()
 
-    # ---------- HYBRID SCORING ----------
+    # hybrid scoring: TF-IDF + category preference
     final_scores = [
         hybrid_score(tfidf_scores[i], articles[i], clicks)
         for i in range(len(articles))
     ]
 
-    ranked_articles = sorted(
+    ranked = sorted(
         zip(articles, final_scores),
         key=lambda x: x[1],
         reverse=True
     )[:MAX_ARTICLES]
 
-    return jsonify([article for article, _ in ranked_articles])
+    return jsonify([a for a, _ in ranked])
 
 
-#  VERIFY USER 
+# ---------- VERIFY USER ----------
 @app.route("/verify-user", methods=["POST"])
 def verify_user():
     try:
@@ -382,7 +531,7 @@ def verify_user():
                 "uid": uid,
                 "email": email,
                 "name": name,
-                "clicks": []      
+                "clicks": []
             })
             print("NEW USER CREATED")
         else:
@@ -400,20 +549,18 @@ def verify_user():
         return jsonify({"success": False, "error": str(e)}), 401
 
 
-# UPDATE PROFILE 
+# ---------- UPDATE PROFILE (backward compatibility) ----------
 @app.route("/update-profile", methods=["POST"])
 def update_profile():
     try:
         data = request.get_json()
         uid = data.get("uid")
         profile = data.get("profile")
-
         users_collection.update_one(
             {"uid": uid},
             {"$set": {"profile": profile}}
         )
         return jsonify({"success": True})
-
     except Exception as e:
         print("PROFILE UPDATE ERROR:", e)
         return jsonify({"success": False}), 500
