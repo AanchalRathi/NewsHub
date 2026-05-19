@@ -18,7 +18,7 @@ import math
 from collections import Counter
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 load_dotenv()
 
 # ---------- MONGODB ----------
@@ -225,24 +225,19 @@ def hybrid_score(tfidf_score, article, clicks):
 
 
 # ---------- SAVE CLICK ----------
-@app.route("/save-click", methods=["POST"])
+@app.route("/save-click", methods=["POST", "OPTIONS"])
 def save_click():
-    """
-    Saves a structured click to MongoDB.
-    Called every time a user clicks an article.
+    if request.method == "OPTIONS":
+        response = jsonify({})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        return response, 200
 
-    Expected body:
-    {
-        "uid": "firebase_uid",
-        "text": "article title + description",
-        "category": "technology",
-        "timestamp": 1716000000
-    }
-    """
     try:
         data = request.get_json()
         uid = data.get("uid")
-        text = data.get("text", "")[:300]   # limit text length
+        text = data.get("text", "")[:300]
         category = data.get("category", "")
         timestamp = data.get("timestamp", time.time())
 
@@ -255,14 +250,13 @@ def save_click():
             "timestamp": timestamp
         }
 
-        # push new click, keep only last MAX_CLICKS clicks
         users_collection.update_one(
             {"uid": uid},
             {
                 "$push": {
                     "clicks": {
                         "$each": [click_obj],
-                        "$slice": -MAX_CLICKS   # keep last 50
+                        "$slice": -MAX_CLICKS
                     }
                 }
             }
@@ -276,14 +270,15 @@ def save_click():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# ---------- GET PROFILE ----------
-@app.route("/get-profile", methods=["GET"])
+@app.route("/get-profile", methods=["GET", "OPTIONS"])
 def get_profile():
-    """
-    Returns the click history for a user.
-    Called on page load so frontend can pass
-    profile to recommendation engine.
-    """
+    if request.method == "OPTIONS":
+        response = jsonify({})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        response.headers.add("Access-Control-Allow-Methods", "GET, OPTIONS")
+        return response, 200
+
     try:
         uid = request.args.get("uid")
         if not uid:
