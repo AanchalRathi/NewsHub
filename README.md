@@ -11,9 +11,6 @@ The platform aggregates news from multiple APIs, learns user interests dynamical
 Frontend (Vercel):  
 https://news-hub-five-pearl.vercel.app/
 
-GitHub Repository:  
-https://github.com/AanchalRathi/NewsHub
-
 Live Video Link:
 https://youtu.be/EUZ2MNO_2Do
 
